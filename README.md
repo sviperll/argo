@@ -26,10 +26,14 @@ Tooling and libraries proved to be critical components of practical language suc
 Tooling and libraries needs language stability. Java is a prime example of highly developed ecosystem.
 And it's firmly based on promise of backward compatibility and gradual changes.
 
-Good language should be simple and minimal. Language shouldn't have features that can be removed.
-Minimal language is easy to learn and it puts little mental burden during programming.
-Many successful languages are really minimal.
+Good language should be simple and minimalistic. Language shouldn't have features that can be removed.
+Minimalistic language is easy to learn and it puts little mental burden during programming.
+Many successful languages are really minimalistic.
 Language simplicity is still subjective, so it comes down to personal judgment and taste.
+I consider Scheme, C, Standard ML to be really minimalistic languages.
+Java, Haskell 98 and Javascript and maybe Python and Rust are more complex, but reasonably minimal.
+OCaml, GHC Haskell, Command Lisp and Ruby are reasonably complex.
+And at last C++, in my opinion, is unreasonably complex.
 
 But language shouldn't stagnate. Language changes should be possible.
 This means that language's changes should be proactively planned for.
@@ -41,7 +45,8 @@ A language feature shouldn't steal syntax that can be used for some feature exte
 The problem of identifying set of possible extensions is ill defined, but nevertheless
 some analysis should be performed anyway following personal judgment, taste and experience.
 
-Readability should be valued more than expressiveness, as, you know, code is read more frequently than written.
+Readability should be valued more than expressiveness, because,
+you know, code is read more frequently than written.
 
 ### Purity, lazy evaluation and non-strict semantics ###
 
@@ -52,9 +57,9 @@ As I see it laziness discussions seem to lack balanced comparison of trade-offs 
 Purity on the other hand seems to be universally prised and accepted.
 Modularity and referential transparency are highly valued and desired.
 
-As been [stated](citation-needed) laziness is the only practical mechanism that paved a way to purity.
+As been [stated](History of Haskell) laziness is the only practical mechanism that paved a way to purity.
 
-Laziness is [required](Why functional programming matters) to achieve really high level of modularity
+Laziness is [required](Why Functional Programming Matters) to achieve really high level of modularity
 and referential transparency.
 
 Moreover laziness is one of the main mechanisms that allowed to simplify language (Haskell)
@@ -146,7 +151,8 @@ extension as language feature.
 
 ### Module structure ###
 
-Inner modules should be provided.
+Inner modules should be provided. By inner modules I mean modules enclosed into parent module
+and defined in the same file alone with parent-module.
 Haskell decision to have top-level modules only leads to bad program structure.
 Short modules are awkward to use since it leads to too many short files.
 Big modules leads to loose structure.
@@ -171,11 +177,12 @@ Having type-signatures allows circular module dependencies without any special m
 And circular module dependencies are used in Haskell anyway with some obscure `.hs-boot` files.
 Complex type seems to be a design problem.
 You should probably not export symbol with overly complicated type or
-you should export some specialization of it, which will allow feature extension.
+you should export some specialization of it, which will allow feature refinements.
 
 ### Module imports ###
 
-Qualified imports should be default. Qualified imports are frequently used by Haskell community.
+Qualified imports should be default.
+Qualified imports are established Haskell practice.
 Qualified imports greatly enhance code readability.
 Unqualified imports should be restricted to save readability.
 For example we can restrict unqualified import to single module.
@@ -207,15 +214,16 @@ Java's position is that alphabetical names are always more descriptive than oper
 hence they should increase readability.
 But counter point is that operators greatly enhance readability at the point when
 you are familiar with them.
-Haskell problem is that it is hard to become familiar with operators.
+Haskell's problem is that it is hard to become familiar with operators.
 And this is real problem for language beginners.
-It is hard to lean all relative operators' priorities.
-When you see `Data.Lens` source it's a shock, even if you know Haskell as a language.
+It is hard to learn all relative operators' priorities.
+When you see `Data.Lens` source first time it's a shock, even
+if you know Haskell as a language reasonably well.
 
 I propose to provide special `operatorset` files that will concisely define all
-operators with their types and relative priorities.
+operators with their types and relative priorities (and associativity).
 
-As with C-family languages you can inspect operator-table several times and
+With C-family languages you can inspect documented table of operators several times and
 become fluent with complex expressions like if conditions.
 
 `operatorset` files should serve this operator-table purpose.
@@ -235,7 +243,13 @@ examining operatorset source should be enough to learn all operators and their p
 
 Type classes bring a can of worms with them.
 Orphan instances should be eradicated, but it's already a stable Haskell practice not to define
-orphan instances. Haskell type-classes have one more fatal flaw. They are not extensible.
+orphan instances. The way to codify already established Haskell-practice is to only allow
+instance declarations along with data-type declarations. This by definition rules out many
+multi-parameter type-classes definitions. You can't have class `Convert a b` to allow conversions
+from some type to another, since it's impossible to define where instance declarations are allowed
+for such type-class. Should you define `Convert Int Text` along with `Int` type or along with `String` type.
+
+Haskell type-classes have one more flaw. They are not extensible.
 It's not possible to slip in `Applicative` class as a super class for `Monad` without breaking all the code.
 And there are possibilities of classes evolution.
 This is known as [Numeric tower](https://en.wikipedia.org/wiki/Numerical_tower) in Lisp world and
@@ -248,12 +262,12 @@ As a start we can allow single parameter type-classes only.
 Type-class instances to be defined with it's data-type only.
 As an extension mechanism we can allow type-class to extend another type-class and
 to provide implementation for extended type class. So `Monad` will not only *require*
-`Applicative`, but will *extends* it and provide it's implementation.
+`Applicative`, but will *extend* it and provide it's implementation.
 
 Every implementation(instance) that defined `Monad` before introducing `Applicative` as it's *extended* type-class
 will work after the change and will automatically implement Applicative.
 
-Meanwhile `class` keyword seems to confusing from other language perspective and it may be better to use
+Meanwhile `class` keyword seems too confusing from other languages' perspective and it may be better to use
 `interface` or `trait`
 
 Here is imaginary syntax to implement Haskell's Ord type-class:
@@ -272,7 +286,7 @@ We can provide multi-parameter type classes when other parameters depends on mai
 
 ````
     interface Map k v:
-        lookup :: self -> k -> Maybe v
+        lookup :: k -> self -> Maybe v
 ````
 
 Here implicit functional dependency is present. Haskell equivalent is
@@ -286,27 +300,92 @@ class Map self k v | self -> k, self -> v where
 
 There are list of problems with data-types syntax
 (see [here](http://www.the-magus.in/Publications/notation.pdf) for example).
-Moreover GADT's proves to be universally accepted type-system feature.
+Moreover GADT's proves to be universally [accepted](OCaml GADT) type-system feature.
 It's seems reasonable to always use GADT-syntax (as provided by GHC) even if GADTs are not allowed
-as a type-level feature.
+as a type-level feature, because GADT-syntax more explicit and clear than legacy grammar-like declaration.
 
-Another problem is data-types namespaces. For example Haskell records can define conflicting accessors.
+Another problem is data-type namespaces. It use usually stated as a problem that Haskell's
+records can define conflicting accessors.
 
 Having inner-modules we can always provide new namespace for data-types. List module can be defined like this:
 
 ````
-data module List a:
-    public constructor cons :: a -> List a
-    public constructor nil :: List a
+module A:
+    module PersonUtil:
+        data Person:
+            public constructor person :: String -> String -> Person
+        public name :: Person -> String
+        name (person? n a) = n
 
-    public map :: (a -> b) -> List a -> List b
-    map f (cons? x xs) = cons (f x) (map f xs)
-    map f nil? = nil
+    module CityUtil:
+        data City:
+            public constructor city :: String -> (Int, Int) -> City
+
+        public name :: City -> String
+        name (city? n coords) = n
 ````
 
-List module will provide List type and will export cons, nil and map symbols.
+It is already an established Haskell practice to name types the same as modules.
+
+````
+module Data.Text (...) where
+    data Text = ...
+    ...
+````
+
+And the way to use this module in Haskell it is [recommended](https://github.com/chrisdone/haskell-style-guide)
+to import this module like this
+
+````
+import qualified Data.Text as Text
+import Data.Text (Text)
+````
+
+We can and probably should build it right into the language and make it possible to define data types
+with their namespaces.
+
+````
+module A:
+    data module Person:
+        public constructor person :: String -> String -> Person
+        public name :: Person -> String
+        name (person? n a) = n
+
+    data module City:
+        public constructor city :: String -> (Int, Int) -> City
+
+        public name :: City -> String
+        name (city? n coords) = n
+````
+
+So when we import such a module:
+
+````
+    import A.Person
+````
+
+we can reference `Person` type without any additional ceremony, and we can reference all values
+from it Person module with `Person.` prefix. Like this:
+
+````
+    hello :: Person -> String
+    hello p = "Hello, " ++ Person.name p
+````
 
 ### Dependent types ###
+
+Haskell has proved that people will push for dependent types.
+Haskell proved that people like Haskell and try to bolt dependent types on it.
+We can see two sides of it.
+
+First is that new dependently typed languages are created
+directly inspired by Haskell: Agda, Idris.
+
+Second is that GHC provides type-system extensions to bring type-system closer to dependently-typed language.
+We now have type-level literals and automatic promotion of data constructors into type level.
+
+With this extensions GHC has now two complex and distinct computational languages.
+One for computations with values and another as powerful as first for computations with types.
 
 ### Final syntax examples ###
 
