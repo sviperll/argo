@@ -11,7 +11,7 @@ Goal
 
 The goal is Golden Fleece.
 Seriously the goal is to create simple and stable language from ground up that
-can hopefully be proved more practical than Haskell or Idris.
+can hopefully be proven more practical than Haskell or Idris.
 Haskell and Idris should be treated as an inspiration, but their design decisions
 should be suspiciously scrutinized to reevaluate them in context of modern programming.
 Haskell and Idris shouldn't be treated as some kind of holy cow and
@@ -23,7 +23,7 @@ Design
 ### General design guidelines ###
 
 Tooling and libraries proved to be critical components of practical language success.
-Tooling and libraries needs language stability. Java is a prime example of highly developed ecosystem.
+Tooling and libraries need language stability. Java is prime example of highly developed ecosystem.
 And it's firmly based on promise of backward compatibility and gradual changes.
 
 Good language should be simple and minimalistic. Language shouldn't have features that can be removed.
@@ -31,7 +31,7 @@ Minimalistic language is easy to learn and it puts little mental burden during p
 Many successful languages are really minimalistic.
 Language simplicity is still subjective, so it comes down to personal judgment and taste.
 I consider Scheme, C, Standard ML to be really minimalistic languages.
-Java, Haskell 98 and Javascript and maybe Python and Rust are more complex, but reasonably minimal.
+Java, Haskell 98 and Javascript and, maybem Python and Rust are more complex, but reasonably minimal.
 OCaml, GHC Haskell, Command Lisp and Ruby are reasonably complex.
 And at last C++, in my opinion, is unreasonably complex.
 
@@ -41,7 +41,7 @@ Every feature should be small and simple.
 Every feature should be as general as possible when simplicity is not sacrificed.
 But most importantly language features shouldn't block future extensions.
 A language feature should be allowed to become more general later.
-A language feature shouldn't steal syntax that can be used for some feature extension.
+A language feature shouldn't steal syntax that can be used for some future extension.
 The problem of identifying set of possible extensions is ill defined, but nevertheless
 some analysis should be performed anyway following personal judgment, taste and experience.
 
@@ -52,7 +52,7 @@ you know, code is read more frequently than written.
 
 It seems that laziness is the main corner stone when discussing functional languages design.
 Main counter point seems to be memory-leaks.
-As I see it laziness discussions seem to lack balanced comparison of trade-offs and benefits.
+As I see it laziness' discussions lack balanced comparison of trade-offs and benefits.
 
 Purity on the other hand seems to be universally prised and accepted.
 Modularity and referential transparency are highly valued and desired.
@@ -62,25 +62,25 @@ As been [stated](History of Haskell) laziness is the only practical mechanism th
 Laziness is [required](Why Functional Programming Matters) to achieve really high level of modularity
 and referential transparency.
 
-Moreover laziness is one of the main mechanisms that allowed to simplify language (Haskell)
+Moreover laziness is one of main mechanisms that allowed to simplify language (Haskell)
 to unprecedented minimalism. Laziness allows to
 
  * Get rid of functions of `() -> a` (unit to some other type) type.
-   There is no need to separate values and "parameterless" functions.
+   There is no need for distinct values and "parameterless" functions.
 
  * Get rid of special treatment of recursion/co-data etc.
 
- * Use `undefined` values as stubs to test and gradually define program on the course of program development.
+ * Use `undefined` values to test and gradually define program on the course of program development.
 
  * Laziness allowed to move really far without using macros (or other meta-programming tools).
-   Most needs filled by common macros' usage in other languages are [filled](example needed) by most basic tools of lazy language.
+   Most needs filled by common macros' usage in other languages are [filled](example needed) by most basic tools of
+   lazy language.
 
-Lets look into memory-leaks problem.
 Memory-leaks on are not eradicated when strict language is used! *They can happen anyway.*
 Languages deal with memory-leaks by providing profilers and other tools to investigate leaks' causes.
 Haskell provide similar memory profiling tools as other strict languages.
 
-All in all I think that laziness benefits outweigh it's problems. Practical functional language should be
+All in all I think that laziness' benefits outweigh it's problems. Practical functional language should be
 
  * Pure
  * Non-strict *by default*
@@ -91,15 +91,16 @@ All in all I think that laziness benefits outweigh it's problems. Practical func
 Hindley-Milner type-system is [prised](citation-needed) as a sweet-spot of practical type-systems.
 On the other hand pure Hindley-Milner type-system is never used.
 
-It should be noted what makes Hindley-Milner so good not from theoretical type-systems point of view, but
-from user interface, user experience point of view.
+It should be noted what makes Hindley-Milner so good not from theoretical type-systems' point of view, but
+from user's interface and user's experience point of view.
 
-Hindley-Milner unlike System F provides two separate languages:
+Hindley-Milner provides two separate languages:
 
- * expression language
- * type language
+ 1. expression language
+ 2. type language
 
-Expression language is what CS in general is about, but type language is what really interesting about Hindley-Milner.
+Expression language fully defines program behavior itself, but type language complements expressions
+to help to get rid of erroneous programms.
 
  * Type language in Hindley-Milner is really minimal and lightweight.
 
@@ -157,7 +158,7 @@ Haskell decision to have top-level modules only leads to bad program structure.
 Short modules are awkward to use since it leads to too many short files.
 Big modules leads to loose structure.
 
-Inner modules leads to problem of file/compilation-unit lookup. Where module should be defined?
+Inner modules bring the problem of file/compilation-unit lookup. Where module should be defined?
 In the same file as parent-module or in subdirectory named as parent-module?
 What if both are present? Case when both definitions are present should be compilation error,
 but how can it be detected? Well working solution can be found in Java as it's separation between
@@ -168,14 +169,14 @@ compilation error.
 ### Module exports ###
 
 Module exports should always have explicit type-signatures.
-This seems counter intuitive since there is that sentiment that Hindley-Milner type systems are cool since
+This seems counter intuitive since there is that sentiment that Hindley-Milner-based type systems are cool since
 most types can be inferred by the compiler, so your are not required to provide type signatures.
 
 There are counter-points so.
 Providing type-signatures for exported symbols is established Haskell-practice.
 Having type-signatures allows circular module dependencies without any special mechanisms.
 And circular module dependencies are used in Haskell anyway with some obscure `.hs-boot` files.
-Complex type seems to be a design problem.
+Complex types seem to be a design problem.
 You should probably not export symbol with overly complicated type or
 you should export some specialization of it, which will allow feature refinements.
 
@@ -208,7 +209,7 @@ Haskell qualified imports are bad in this respect since it's usually a burden to
 
 ### Infix operators ###
 
-Infix operators should be restricted. There is some kind of two extremes with this.
+Infix operators should be restricted. There are kind of two extremes with this.
 Haskell provides full custom operators. Java provides no operator overloading at all.
 Java's position is that alphabetical names are always more descriptive than operators,
 hence they should increase readability.
@@ -387,6 +388,12 @@ We now have type-level literals and automatic promotion of data constructors int
 With this extensions GHC has now two complex and distinct computational languages.
 One for computations with values and another as powerful as first for computations with types.
 
+TOBEWRITTEN
+
+### Metaprogramming ###
+
+TOBEWRITTEN
+
 ### Final syntax examples ###
 
 ````
@@ -399,3 +406,5 @@ data module List a implements Functor:
 ````
 
 ### Compilation and Run-time ###
+
+TOBEWRITTEN
