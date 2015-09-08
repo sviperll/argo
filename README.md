@@ -57,9 +57,9 @@ As I see it laziness' discussions lack balanced comparison of trade-offs and ben
 Purity on the other hand seems to be universally prised and accepted.
 Modularity and referential transparency are highly valued and desired.
 
-As been [stated](History of Haskell) laziness is the only practical mechanism that paved a way to purity.
+As been [stated](http://research.microsoft.com/en-us/um/people/simonpj/papers/history-of-haskell/history.pdf) laziness is the only practical mechanism that paved a way to purity.
 
-Laziness is [required](Why Functional Programming Matters) to achieve really high level of modularity
+Laziness is [required](https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf) to achieve really high level of modularity
 and referential transparency.
 
 Moreover laziness is one of main mechanisms that allowed to simplify language (Haskell)
@@ -73,7 +73,7 @@ to unprecedented minimalism. Laziness allows to
  * Use `undefined` values to test and gradually define program on the course of program development.
 
  * Laziness allowed to move really far without using macros (or other meta-programming tools).
-   Most needs filled by common macros' usage in other languages are [filled](example needed) by most basic tools of
+   Most needs filled by common macros' usage in other languages are [filled](https://www.google.com/search?q=macros+vs+lazy+evaluation&ie=utf-8&oe=utf-8) by most basic tools of
    lazy language.
 
 Memory-leaks on are not eradicated when strict language is used! *They can happen anyway.*
@@ -366,7 +366,7 @@ So when we import such a module:
 ````
 
 we can reference `Person` type without any additional ceremony, and we can reference all values
-from it Person module with `Person.` prefix. Like this:
+from Person module with `Person.` prefix. Like this:
 
 ````
     hello :: Person -> String
@@ -388,7 +388,18 @@ We now have type-level literals and automatic promotion of data constructors int
 With this extensions GHC has now two complex and distinct computational languages.
 One for computations with values and another as powerful as first for computations with types.
 
-TOBEWRITTEN
+But do we really need dependent types at all?
+There are [some](http://www.brics.dk/RS/01/10/BRICS-RS-01-10.pdf)
+[evidence](http://jadpole.github.io/rust/typechecked-matrix/) that most benefits are provided
+by type-level (string and numeric) literals and not by dependent types per se.
+
+It seems still a research topic.
+And research topic is something you should try to avoid when designing industrial programming language...
+
+Still we can follow Haskell now and try to leave space for future addition of dependent-types.
+This is still a problem and should be solved for successful language design.
+
+
 
 ### Metaprogramming ###
 
@@ -397,9 +408,21 @@ TOBEWRITTEN
 ### Final syntax examples ###
 
 ````
+package argo.util
+
+import argo.util.Functor
+
 data module List a implements Functor:
     public constructor cons :: <a> a -> List a
     public constructor nil :: <a> List a
+
+    public append :: List a -> List a -> List a
+    append (cons? x xs) ys = cons x (append xs ys)
+    append nil? ys = ys
+
+    public reverse :: <a> List a -> List a
+    reverse (cons? x xs) = append (reverse xs) (cons x nil)
+    reverse nil? = nil
 
     Functor.fmap f (cons? x xs) = cons (f x) (Functor.fmap f xs)
     Functor.fmap f nil? = nil
