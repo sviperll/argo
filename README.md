@@ -17,6 +17,19 @@ should be suspiciously scrutinized to reevaluate them in context of modern progr
 Haskell and Idris shouldn't be treated as some kind of holy cow and
 should be turned into laboratory rabbit instead.
 
+Roadmap
+-------
+
+ * Become self-hosted as fast as possible to have first-hand experience with language.
+ * First write damn parser and transpiler into Haskell.
+ * Implement parser and transpiler in language itself.
+ * Add type-checking.
+ * Compile to STG-language.
+ * Write STG-interpreter in Rust.
+ * Implement profiling/hot-spot detection in interpreter.
+ * Implement Just-in-time optimization (supercompilation).
+ * Implement Just-in-time compilation into native language.
+
 Design
 ------
 
@@ -399,11 +412,64 @@ And research topic is something you should try to avoid when designing industria
 Still we can follow Haskell now and try to leave space for future addition of dependent-types.
 This is still a problem and should be solved for successful language design.
 
-
+One low hanging fruit on this path is language identifiers.
+We should probably not make any assumption about identifiers character case
+from the start to avoid many Haskell's problems that lead to awkward syntax.
 
 ### Metaprogramming ###
 
-TOBEWRITTEN
+It is still an open question wheather non-strict functional language needs
+real metaprogramming.
+
+Metaprogramming is easy in Lisp since Lisp has little syntax, but
+it is definitly trickier in language like Haskell.
+
+Metaprogramming brings quasi-quotation to the table.
+After beeing watching Yesod project I would really like to avoid
+any quasi-quotation abuse and not provide any form of quasi-quotation
+altogeather.
+
+My feeling is that metaprogramming shouldn't be easy.
+We should really try to explore language limitations and
+try to design language around them and
+not drink metaprogramming kool-aid.
+
+What I see as a real need for metaprogramming is compile-time
+processing of some externally provided data. For example,
+web-development requires HTML-code generation.
+HTML-code is usually developed externally to provide
+easy sharing and possible independent/design-driven development.
+When HTML-code is developed independently we would like
+to statically check and generate code to render application data
+into given HTML-templates.
+
+Another example is generation interoperability routines
+from some standard interface-description language,
+for instance generation of Document Object Model (DOM) implementation
+using IDL-description provided by W3C.
+
+This can be achieved with metaprogramming facilities.
+Considering above examples we can conclude that
+metaprogramming needs IO or at least an ability to read file.
+
+Metaprogramming facilities needs to define language
+that can be used to generate expressions/declarations.
+My point is that this language should not be
+full-fledged mirror of original language.
+Generated language doesn't need syntactic-sugar.
+There is simple no need for it since you can always implement
+any sugar you want in host-language.
+
+Even if metaprogramming is not implemented at first
+we must leave space for it to possible be bolted on later.
+Therefore it is better to have two defined language levels from the start:
+kernel-language, full-language.
+
+Kernel-language is a language without syntactic-sugar.
+Haskell doesn't have it's variant of kernel language.
+GHC has *core*-language, but it is too low level and
+Haskell to *core* translation is [really](GHC implementation) not obvious.
+
 
 ### Final syntax examples ###
 
@@ -428,6 +494,60 @@ data module List a implements Functor:
     Functor.fmap f nil? = nil
 ````
 
+We may possibly leave out layout rules...
+
+````
+package ru.mobico.sviperll.test;
+
+import argo.lang.System;
+import argo.lang.Void;
+import argo.lang.IO;
+
+module Main {
+    public main1 :: IO Void;
+    main1 = do {
+        name <- System.readLine;
+        System.putStrLn message;
+    } where {
+        message = "Hello, World!";
+    }
+
+    public main2 :: IO Void;
+    main2 =
+        do {
+            name <- System.readLine;
+            System.putStrLn message;
+        } where {
+            message = "Hello, World!";
+        }
+
+    public main3 :: IO Void;
+    main3 = do {
+        name <- System.readLine;
+        System.putStrLn message;
+    } where {
+        message = "Hello, World!";
+    }
+
+    public map :: <a b> (a -> b) - > List a -> List b;
+    map f (cons? x xs) = cons (f x) (map f xs);
+
+    fibs :: List Int;
+    fibs = cons 1 $ cons 1 $ zipWith (+) fibs (tail fibs);
+
+    qsort :: <a> List a -> List a;
+    qsort nil? = nil;
+    qsort (cons? x xs) = append (qsort ls) (cons x $ qsort rs)
+        where (ls, rs) = partition (< x) xs;
+}
+
+````
+
 ### Compilation and Run-time ###
 
 TOBEWRITTEN
+
+### Layout rule and curly braces ###
+
+### Negative number syntax ###
+
