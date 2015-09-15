@@ -539,6 +539,11 @@ module Main {
     qsort nil? = nil;
     qsort (cons? x xs) = append (qsort ls) (cons x $ qsort rs)
         where (ls, rs) = partition (< x) xs;
+
+    fact :: <a> a -> a where {a implements Num};
+    fact x
+        if (x <= 0) = 1
+        else = x * fact (x - 1)
 }
 
 ````
