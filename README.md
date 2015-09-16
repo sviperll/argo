@@ -487,6 +487,42 @@ Haskell doesn't have it's variant of kernel language.
 GHC has *core*-language, but it is too low level and
 Haskell to *core* translation is [really](GHC implementation) not obvious.
 
+### Compilation and Run-time ###
+
+This topic is akin discussion of lazyness.
+What I want to state is that VM is needed for language, similar to JVM.
+VM is the only known way to get both modularity and performance.
+
+VM provides:
+
+ * Fast compilation times.
+   Go language proves that this may be very important to some peaple.
+
+ * Fast execution of modular code.
+   VM has no limitations on optimizing little functions spread out acros bunch of modules.
+
+Optimizing compilers can be close like GHC, but it has costs
+
+ * Much longer compilation times.
+   Compiler needs to optimize everything unlike VM that can optimize hot spots only.
+
+ * True separate compilation can't be implemented becase
+   cross-module inlining prevents it.
+   You need to recompile every dependent module even if module interface doesn't change
+   to prevent inlining of old (bad) version of some function.
+
+To get true benefits from VM. VM (byte-)code should be best suited for optimization.
+This means that code should be high-level enough.
+GHC Core language should be VM's "byte-code" if we going to build VM for GHC-Haskell,
+because GHC performs most of it's optimizations on Core-level.
+
+I'd like to use supercompilation as an optimization technique, since it get some
+[good results](citation needed). If we what to use supercompilation as a VM's
+optimization technique, we should use STG language as a VM's byte-code.
+
+### Layout rule and curly braces ###
+
+### Negative number syntax ###
 
 ### Final syntax examples ###
 
@@ -565,11 +601,4 @@ module Main {
 
 ````
 
-### Compilation and Run-time ###
-
-TOBEWRITTEN
-
-### Layout rule and curly braces ###
-
-### Negative number syntax ###
 
