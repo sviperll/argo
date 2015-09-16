@@ -21,13 +21,30 @@ Roadmap
 -------
 
  * Become self-hosted as fast as possible to have first-hand experience with language.
- * First write damn parser and transpiler into Haskell.
+
+ * First write parser and transpiler into Haskell without any type-checking or processing.
+
  * Implement parser and transpiler in language itself.
+
  * Add type-checking.
+
  * Compile to STG-language.
+   We can generate Rust source code to build in-memory STG-expressions.
+   This source code will serve as an external format
+   for compiled code.
+   This will allow to avoid complications with
+   definition of some independent external fromat like it's serialization and validation.
+
  * Write STG-interpreter in Rust.
+
+ * Experiment with STG-interpreter to finally define
+   external format for compiled code that will allow validation
+   and possible alternative implementations.
+
  * Implement profiling/hot-spot detection in interpreter.
- * Implement Just-in-time optimization (supercompilation).
+
+ * Implement Just-in-time optimization (Just-in-time supercompilation).
+
  * Implement Just-in-time compilation into native language.
 
 Design
