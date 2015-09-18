@@ -520,6 +520,25 @@ I'd like to use supercompilation as an optimization technique, since it get some
 [good results](citation needed). If we what to use supercompilation as a VM's
 optimization technique, we should use STG language as a VM's byte-code.
 
+This brings us to "Just use JVM" sentiment.
+The problem with JVM is that if we really need speed than JVM will be a limitation in the end.
+JVM will not be able to optimize things that we really think needs optimizing for our language,
+list deforestarization for example.
+If we don't need speed we can easyly write simple interpreter and be done.
+If we write simple interpreter we can later impliment optimization and
+just-in-time compilation. If we choose JVM we are stuck with the choices of JVM-developers.
+
+"Just use JVM" sentiment has another side.
+It references that Java has lots of libraries and tools built for it and
+we can just reuse them.
+But Java-ecosystem is not unique, Python has lots of high-quality libraries,
+GNU ecosystem built around C-programming language has a lot to offer.
+We may be better with some flexible interoperability scheme than to tie ourselfs with
+one particular ecosystem.
+
+Another point to remind is that lots of Java-tools are not tied to Java at all.
+You can use Java-IDEs for practically any language and you can similarily use Java built tools.
+
 ### Layout rule and curly braces ###
 
 ### Negative number syntax ###
