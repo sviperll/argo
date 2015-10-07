@@ -6,17 +6,6 @@ Pragmatic functional programming language
 Here are some of my thought about possible language design.
 There is no language yet, but The journey is the destination.
 
-Goal
-----
-
-The goal is Golden Fleece.
-Seriously the goal is to create simple and stable language from ground up that
-can hopefully be proven more practical than Haskell or Idris.
-Haskell and Idris should be treated as an inspiration, but their design decisions
-should be suspiciously scrutinized to reevaluate them in context of modern programming.
-Haskell and Idris shouldn't be treated as some kind of holy cow and
-should be turned into laboratory rabbit instead.
-
 Roadmap
 -------
 
@@ -33,13 +22,15 @@ Roadmap
    This source code will serve as an external format
    for compiled code.
    This will allow to avoid complications with
-   definition of some independent external fromat like it's serialization and validation.
+   definition of some independent external format like it's serialization and validation.
 
  * Write STG-interpreter in Rust.
 
  * Experiment with STG-interpreter to finally define
    external format for compiled code that will allow validation
    and possible alternative implementations.
+
+ * Try to provide IDE support with syntax-highlighting and rename refactoring
 
  * Implement profiling/hot-spot detection in interpreter.
 
@@ -61,7 +52,7 @@ Minimalistic language is easy to learn and it puts little mental burden during p
 Many successful languages are really minimalistic.
 Language simplicity is still subjective, so it comes down to personal judgment and taste.
 I consider Scheme, C, Standard ML to be really minimalistic languages.
-Java, Haskell 98 and Javascript and, maybem Python and Rust are more complex, but reasonably minimal.
+Java, Haskell 98 and Javascript and, maybe Python and Rust are more complex, but reasonably minimal.
 OCaml, GHC Haskell, Command Lisp and Ruby are reasonably complex.
 And at last C++, in my opinion, is unreasonably complex.
 
@@ -130,7 +121,7 @@ Hindley-Milner provides two separate languages:
  2. type language
 
 Expression language fully defines program behavior itself, but type language complements expressions
-to help to get rid of erroneous programms.
+to help to get rid of erroneous programs.
 
  * Type language in Hindley-Milner is really minimal and lightweight.
 
@@ -141,15 +132,28 @@ to help to get rid of erroneous programms.
 Type language separation allows type-level reasoning for programmers.
 They can fully ignore expressions and reason about program behavior using type-level language only.
 Programmers can specify high level program behavior and properties using type-language only.
-Type language only can be used as a design tool (like UML, but better) without actual code (implementation).
+Type language only can be used as a design tool (like UML) without actual code (implementation).
 
 This two-level structure with two separate languages seems really valuable.
 This structure is severely damaged in dependently-typed languages.
 But it seems that nevertheless dependently-typed languages tries to preserve it.
-My position is that it is not a coincidence.
-Type-expression language separation is really valuable from user experience point of view.
+My position is that type-expression language separation is really valuable from user experience point of view.
 
-This separations should be preserved as much as possible.
+Controversial topic here is Haskell's scoped type variables (ScopedTypeVariables extension).
+At first Haskell assumes that type signature and value-expression
+are totally separate for every declared name, but with scoped type variables they are not separate at all.
+You can reference type-variables from type signature in value-expression however type signature and expression
+are clearly syntacticly separated without any hint about their connection.
+Nevertheless ScopedTypeVariables are seldom used but are really important when they are used.
+We may provide some kind of special syntax to use when scoped type variables are needed.
+
+````
+mkpair1 :: <a b> a -> b -> (a, b) where
+    mkpair1 aa bb = (ida aa, bb) where {
+        ida :: a -> a;
+        ida = id;
+    };
+````
 
 ### Type system extensions ###
 
@@ -160,8 +164,6 @@ sacrificing type-system usability.
 Haskell is positioned as an academic playground in this process.
 Type-system extension trade-offs and benefits are not easily envisioned.
 Haskell provides an environment to test and find best trade-offs.
-From the other side this seems like a constant fight of the whole ecosystem with it own energy source.
-Life has flourished around a bright star, but constant threat is present to be wiped out by it's super-nova explosion.
 
 Haskell-prime was created to provide stable Haskell-flavor, but it seems [abandoned](citation needed) by it's community.
 It seems that Haskell community fully embraced the stream of minor backward incompatible changes.
@@ -178,9 +180,20 @@ Type system extension mechanism can be provided for language but it should bring
 Your library is guaranteed not to work with next release of a compiler if you use type-system extension.
 This promise of instability should prevent general adoption of extensions.
 When extension proves to be useful it will stimulate a community backed movement to adopt and stabilize
-extension as language feature.
+extension as a language feature.
 
-### Module structure ###
+Rust language provides another way to ensure that experimental features are not adopted.
+Rust provides both stable compiler and unstable nightly builds.
+Experimental language features are not accessible from stable compiler.
+The only way to get experimental language features is to become compiler's tester which seams a reasonable contract.
+
+We can bind experimental language features to specific compiler version to ensure breakage.
+If we do this than library that uses experimental feature will be unstable.
+It will surely break with next compiler version.
+Rust-way seems to be better as it requires some special compiler version for unstable libraries and thus
+clearly marks unstable libraries.
+
+### Modules ###
 
 Inner modules should be provided. By inner modules I mean modules enclosed into parent module
 and defined in the same file alone with parent-module.
@@ -196,8 +209,6 @@ packages and classes. Same separation can be introduced.
 Every module should be defined in some package and name clash between module and package should be
 compilation error.
 
-### Module exports ###
-
 Module exports should always have explicit type-signatures.
 This seems counter intuitive since there is that sentiment that Hindley-Milner-based type systems are cool since
 most types can be inferred by the compiler, so your are not required to provide type signatures.
@@ -209,8 +220,6 @@ And circular module dependencies are used in Haskell anyway with some obscure `.
 Complex types seem to be a design problem.
 You should probably not export symbol with overly complicated type or
 you should export some specialization of it, which will allow feature refinements.
-
-### Module imports ###
 
 Qualified imports should be default.
 Qualified imports are established Haskell practice.
@@ -246,7 +255,7 @@ hence they should increase readability.
 But counter point is that operators greatly enhance readability at the point when
 you are familiar with them.
 Haskell's problem is that it is hard to become familiar with operators.
-And this is real problem for language beginners.
+And this is a real problem for language beginners.
 It is hard to learn all relative operators' priorities.
 When you see `Data.Lens` source first time it's a shock, even
 if you know Haskell as a language reasonably well.
@@ -254,21 +263,21 @@ if you know Haskell as a language reasonably well.
 I propose to provide special `operatorset` files that will concisely define all
 operators with their types and relative priorities (and associativity).
 
-With C-family languages you can inspect documented table of operators several times and
-become fluent with complex expressions like if conditions.
+With C-family languages you can inspect documentation to find nice table of operators with their relative precedence
+and quickly become fluent with complex expressions like if-conditions.
 
 `operatorset` files should serve this operator-table purpose.
-You can see it and learn it and than you can easily read code with this operators.
+You can see it and learn it and than you can easily read code with these operators.
 
 This means that every compilation-unit (module) can explicitly import single `operatorset`
 and use operators from this set.
 
-When multiple operatorsets are required this should hint that maybe module should be split
+When multiple `operatorsets` are required this should hint that maybe it's time to split module
 to reduce cognitive load.
 
-Some standard operatorset can be defined to be implicitly available.
-But custom operators should require explicit import of operatorset and
-examining operatorset source should be enough to learn all operators and their precedence.
+Some standard `operatorset` can be defined to be implicitly available.
+But custom operators should require explicit import of `operatorset` and
+examining `operatorset` source should be enough to learn all operators and their precedence.
 
 ### Type classes ###
 
@@ -280,44 +289,27 @@ multi-parameter type-classes definitions. You can't have class `Convert a b` to 
 from some type to another, since it's impossible to define where instance declarations are allowed
 for such type-class. Should you define `Convert Int Text` along with `Int` type or along with `String` type.
 
-Haskell type-classes have one more flaw. They are not extensible.
-It's not possible to slip in `Applicative` class as a super class for `Monad` without breaking all the code.
-And there are possibilities of classes evolution.
-This is known as [Numeric tower](https://en.wikipedia.org/wiki/Numerical_tower) in Lisp world and
-Haskell has it's own Monad tower.
-Monad tower evolution is required (where is my `Pointed` class?).
-Type classes should be extensible without client code breakage.
-Extensibility of type-classes requires constraints on type class definitions and implementations.
-
-As a start we can allow single parameter type-classes only.
-Type-class instances to be defined with it's data-type only.
-As an extension mechanism we can allow type-class to extend another type-class and
-to provide implementation for extended type class. So `Monad` will not only *require*
-`Applicative`, but will *extend* it and provide it's implementation.
-
-Every implementation(instance) that defined `Monad` before introducing `Applicative` as it's *extended* type-class
-will work after the change and will automatically implement Applicative.
-
+Here is imaginary syntax to implement Haskell's Ord type-class.
 Meanwhile `class` keyword seems too confusing from other languages' perspective and it may be better to use
 `interface` or `trait`
 
-Here is imaginary syntax to implement Haskell's Ord type-class:
-
 ````
-    interface Ord extends Eq:
-        compare :: self -> self -> Order
+    interface Ord extends Eq {
+        compare :: self -> self -> Order;
 
         equals a b =
             case compare a b:
                 EQ -> True
-                _ -> False
+                _ -> False;
+    }
 ````
 
 We can provide multi-parameter type classes when other parameters depends on main *self* parameter
 
 ````
-    interface Map k v:
-        lookup :: k -> self -> Maybe v
+    interface <k v> Map k v {
+        lookup :: k -> self -> Maybe v;
+    }
 ````
 
 Here implicit functional dependency is present. Haskell equivalent is
@@ -327,13 +319,77 @@ class Map self k v | self -> k, self -> v where
     lookup :: self -> k -> Maybe v
 ````
 
+Haskell type-classes have one more flaw. They are not extensible.
+It's not possible to slip in `Applicative` class as a super class for `Monad` without breaking all the code.
+And there are possibilities of type-class hierarchy evolution.
+This is known as [Numeric tower](https://en.wikipedia.org/wiki/Numerical_tower) in Lisp world and
+Haskell has it's own Monad tower.
+Monad tower evolution seems inevitable (see [The Other Prelude](https://wiki.haskell.org/The_Other_Prelude) and [AMP](https://wiki.haskell.org/Functor-Applicative-Monad_Proposal) Haskell-proposals).
+Type classes should be extensible without client code breakage.
+Extensibility of type-classes requires constraints on type class definitions and implementations.
+
+As a start we can allow single parameter type-classes only.
+Type-class instances to be defined with it's data-type only.
+As an extension mechanism we can allow type-class to provide implementation for required type-classes.
+Another mechanism is direct extension. Extension means that type class is not only required, but
+makes all methods of extended class accessible as if they are members of current class.
+
+With Monad-Applicative example you can make `Monad` extend `Applicative`
+In such setting you can move `return` method from `Monad` to `Applicative` without client code breakage.
+
+Before making `Applicative` superclass of `Monad`:
+
+```
+    interface Applicative extends Functor {
+        apply :: <a b> self (a -> b) -> self a -> self b;
+        pure :: <a> a -> self a;
+        then :: <a b> self a -> self b -> self b;
+
+        then a b = apply (map (const id) a) b
+    }
+
+    interface Monad {
+        return :: <a> a -> self a;
+        bind :: <a b> self a -> (a -> self b) -> self b;
+        then :: <a b> self a -> self b -> self b;
+
+        then a b = bind a (\_ -> b)
+    }
+```
+
+After making `Applicative` superclass of `Monad`:
+
+```
+    interface Applicative extends Functor {
+        apply :: <a b> self (a -> b) -> self a -> self b;
+        pure :: <a> a -> self a;
+        return :: <a> a -> self a;
+        then :: <a b> self a -> self b -> self b;
+
+        then a b = apply (map (const id) a) b
+        pure = return
+        return = pure
+    }
+
+    interface Monad extends Applicative {
+        bind :: <a b> self a -> (a -> self b) -> self b;
+        join :: <a> self (self a) -> self a
+
+        bind a f = join (fmap f a)
+        join a = bind a id
+    }
+```
+
+Every implementation(instance) that defined `Monad` before introducing `Applicative` as it's *extended* type-class
+will work after the change and will automatically implement Applicative.
+
 ### Data types ###
 
 There are list of problems with data-types syntax
 (see [here](http://www.the-magus.in/Publications/notation.pdf) for example).
 Moreover GADT's proves to be universally [accepted](OCaml GADT) type-system feature.
 It's seems reasonable to always use GADT-syntax (as provided by GHC) even if GADTs are not allowed
-as a type-level feature, because GADT-syntax more explicit and clear than legacy grammar-like declaration.
+as a type-level feature, because GADT-syntax is more explicit and clear than legacy grammar-like declaration.
 
 Another problem is data-type namespaces. It use usually stated as a problem that Haskell's
 records can define conflicting accessors.
@@ -356,7 +412,7 @@ module A:
         name (city? n coords) = n
 ````
 
-It is already an established Haskell practice to name types the same as modules.
+It is already an established Haskell practice to name types with the same name as module. Like here
 
 ````
 module Data.Text (...) where
@@ -364,8 +420,7 @@ module Data.Text (...) where
     ...
 ````
 
-And the way to use this module in Haskell it is [recommended](https://github.com/chrisdone/haskell-style-guide)
-to import this module like this
+It is [recommended](https://github.com/chrisdone/haskell-style-guide) to import this module like this
 
 ````
 import qualified Data.Text as Text
@@ -392,7 +447,7 @@ module A:
 So when we import such a module:
 
 ````
-    import A.Person
+    import pkg.A.Person
 ````
 
 we can reference `Person` type without any additional ceremony, and we can reference all values
@@ -430,21 +485,22 @@ Still we can follow Haskell now and try to leave space for future addition of de
 This is still a problem and should be solved for successful language design.
 
 One low hanging fruit on this path is language identifiers.
-We should probably not make any assumption about identifiers character case
+We should probably not make any assumption about identifier character case
+and treat upper-case and lower-case identifiers without any prejudices
 from the start to avoid many Haskell's problems that lead to awkward syntax.
 
 ### Metaprogramming ###
 
-It is still an open question wheather non-strict functional language needs
+It is still an open question whether non-strict functional language needs
 real metaprogramming.
 
 Metaprogramming is easy in Lisp since Lisp has little syntax, but
 it is definitly trickier in language like Haskell.
 
 Metaprogramming brings quasi-quotation to the table.
-After beeing watching Yesod project I would really like to avoid
+After being watching for Yesod project I would really like to avoid
 any quasi-quotation abuse and not provide any form of quasi-quotation
-altogeather.
+altogether.
 
 My feeling is that metaprogramming shouldn't be easy.
 We should really try to explore language limitations and
@@ -474,11 +530,11 @@ that can be used to generate expressions/declarations.
 My point is that this language should not be
 full-fledged mirror of original language.
 Generated language doesn't need syntactic-sugar.
-There is simple no need for it since you can always implement
+There is simply no need for it since you can always implement
 any sugar you want in host-language.
 
 Even if metaprogramming is not implemented at first
-we must leave space for it to possible be bolted on later.
+we must leave space for it to be possibly bolted on later.
 Therefore it is better to have two defined language levels from the start:
 kernel-language, full-language.
 
@@ -496,17 +552,17 @@ VM is the only known way to get both modularity and performance.
 VM provides:
 
  * Fast compilation times.
-   Go language proves that this may be very important to some peaple.
+   Go language proves that this may be very important to some people.
 
  * Fast execution of modular code.
-   VM has no limitations on optimizing little functions spread out acros bunch of modules.
+   VM has no limitations on optimizing little functions spread out across bunch of modules.
 
-Optimizing compilers can be close like GHC, but it has costs
+Optimizing compilers can be used like GHC, but they has costs
 
  * Much longer compilation times.
    Compiler needs to optimize everything unlike VM that can optimize hot spots only.
 
- * True separate compilation can't be implemented becase
+ * True separate compilation can't be implemented because
    cross-module inlining prevents it.
    You need to recompile every dependent module even if module interface doesn't change
    to prevent inlining of old (bad) version of some function.
@@ -521,11 +577,11 @@ I'd like to use supercompilation as an optimization technique, since it get some
 optimization technique, we should use STG language as a VM's byte-code.
 
 This brings us to "Just use JVM" sentiment.
-The problem with JVM is that if we really need speed than JVM will be a limitation in the end.
+The problem with JVM is that if we really need speed then JVM will be a limitation in the end.
 JVM will not be able to optimize things that we really think needs optimizing for our language,
 list deforestarization for example.
-If we don't need speed we can easyly write simple interpreter and be done.
-If we write simple interpreter we can later impliment optimization and
+If we don't need speed we can easily write simple interpreter and be done.
+If we write simple interpreter we can later implement optimization and
 just-in-time compilation. If we choose JVM we are stuck with the choices of JVM-developers.
 
 "Just use JVM" sentiment has another side.
@@ -533,15 +589,56 @@ It references that Java has lots of libraries and tools built for it and
 we can just reuse them.
 But Java-ecosystem is not unique, Python has lots of high-quality libraries,
 GNU ecosystem built around C-programming language has a lot to offer.
-We may be better with some flexible interoperability scheme than to tie ourselfs with
+We may be better with some flexible interoperability scheme than to tie our selfs with
 one particular ecosystem.
 
 Another point to remind is that lots of Java-tools are not tied to Java at all.
-You can use Java-IDEs for practically any language and you can similarily use Java built tools.
+You can use Java-IDEs and Java build-tools for languages other than Java.
 
 ### Layout rule and curly braces ###
 
-### Negative number syntax ###
+I have no strong opinions about layout rule. But lately I've stated to think that it brings more
+complications than benefits. Modern languages like rust and ruby seems to get away without layout processing.
+Haskell's layout rule was one of the obstacles when I've been learning language.
+Even now the fact that Haskell's parser fixes parsing errors by automatically inserting closing curly braces
+makes me uncomfortable.
+
+### Numbers and literals ###
+
+Haskell as it is has two simple problems with it's built in syntax and types.
+
+First is it's reliance on `Integer`-type. Integer is unbounded integer type.
+There reality is that `Integer` is not usually useful as it is for many programs, but
+nevertheless it is used by almost all Haskell code, since any numeric literal
+implicitly creates `Integer` and then convert `Integer` to some actually used type
+(fast system dependent `Int`). Fast `Integer` implementation is not trivial and is not
+easily found on many platforms (Javascript for instance).
+
+It seems to me that large numeric literals are almost never used in actual code.
+It may be better to get rid of reliance on `Integer`-type.
+Go-language has polymorphic numeric literals like Haskell do, but doesn't rely on some
+unbounded integer type. Another problem with `Integer` is overflow.
+What if literal is too large for required type? With Haskell's `Num` class we get run-time error
+when calling `fromInteger` method. It should be better to always get compile-time errors on such occasions.
+
+We can solve these problems by introducing hierarchy of classes instead of simple `fromInteger` method.
+We can introduce `FromWord8`, `FromWord16`, `FromWord32` classes and choose least required class
+depending on actual literal value.
+
+`8` is a syntactic-sugar for `fromWord8 (8::Word8)`. `300` is a syntactic sugar for `fromWord16 (300::Word16)`.
+
+With such class hierarchy we can get rid of unbounded `Integer` type on platforms where it is problematic.
+We get compile-time error `Word8 doen't implement FromWord16 interface` for expression `300::Word8`
+with such class hierarchy.
+
+Another Haskell pain-point is negative numbers. Should minus operator be unary operator?
+Should minus operator be part of number syntax? I'm inclined to cut this knot and say that
+minus is *always* infix operator and there will be no negative number syntax.
+
+You can always write `0 - 5` or `negative 5` to denote negative number.
+And this is an actual expression and not a single token.
+Such expressions can be optimized away to behave like compile-time constants.
+But in the end we get simple and uniform language without strange dark corners.
 
 ### Final syntax examples ###
 
@@ -572,11 +669,11 @@ We may possibly leave out layout rules...
 package ru.mobico.sviperll.test;
 
 import argo.lang.System;
-import argo.lang.Void;
+import argo.lang.Unit;
 import argo.lang.IO;
 
 module Main {
-    public main1 :: IO Void;
+    public main1 :: IO Unit;
     main1 = do {
         name <- System.readLine;
         System.putStrLn message;
@@ -584,7 +681,7 @@ module Main {
         message = "Hello, World!";
     }
 
-    public main2 :: IO Void;
+    public main2 :: IO Unit;
     main2 =
         do {
             name <- System.readLine;
@@ -593,7 +690,7 @@ module Main {
             message = "Hello, World!";
         }
 
-    public main3 :: IO Void;
+    public main3 :: IO Unit;
     main3 = do {
         name <- System.readLine;
         System.putStrLn message;
@@ -603,6 +700,7 @@ module Main {
 
     public map :: <a b> (a -> b) - > List a -> List b;
     map f (cons? x xs) = cons (f x) (map f xs);
+    map f nil? = nil;
 
     fibs :: List Int;
     fibs = cons 1 $ cons 1 $ zipWith (+) fibs (tail fibs);
