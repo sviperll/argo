@@ -595,6 +595,56 @@ one particular ecosystem.
 Another point to remind is that lots of Java-tools are not tied to Java at all.
 You can use Java-IDEs and Java build-tools for languages other than Java.
 
+### Dependency management ###
+
+It seems that dependency management across libraries is not a language design problem.
+But there are evidences that successful solution requires at least some support from language level.
+In Java's case such a [solution](http://openjdk.java.net/projects/jigsaw/) has lead to an extention of original language.
+I've found [Version SAT essay](https://research.swtch.com/version-sat) very inspireing and
+I think it should be great to adopt it's proposed solution to dependency management.
+
+>
+> One way to avoid NP-completeness is to attack assumption 1:
+> what if, instead of allowing a dependency to list specific package versions,
+> a dependency can only specify a minimum version?
+> Then there is a trivial algorithm for finding the packages to use:
+>
+>  * start with the newest version of what you want to install, and then
+>  * get the newest version of all its dependencies, recursively.
+>
+> In the original diamond dependency at the beginning of this article,
+> A needs B and C, and B and C need different versions of D.
+> If B needs D 1.5 and C needs D 1.6, the build can use D 1.6 for both.
+> If B doesn’t work with D 1.6, then either the version of B we’re considering is buggy or D 1.6 is buggy.
+> The buggy version should be removed from circulation entirely, and then a new released version should fix the problem.
+> Adding a conflict to the dependency graph instead is like documenting a bug instead of fixing it.
+>
+> Another way to avoid NP-completeness is to attack assumption 4:
+> what if two different versions of a package could be installed simultaneously?
+> Then almost any search algorithm will find a combination of packages to build the program;
+> it just might not be the smallest possible combination (that’s still NP-complete).
+> If B needs D 1.5 and C needs D 2.2, the build can include both packages in the final binary,
+> treating them as distinct packages.
+> I mentioned above that there can’t be two definitions of printf built into a C program,
+> but languages with explicit module systems should have no problem including separate copies of D
+> (under different fully-qualified names) into a program.
+>
+> Another way to avoid NP-completeness is to combine the previous two.
+> As the examples already hint at, if packages follow semantic versioning,
+> a package manager might automatically use the newest version of a dependency within a major version
+> but then treat different major versions as different packages.
+>
+
+So, I'd like to adopt last metnioned solution and allow different major versions of the same package to
+be used simulateously. As mentioned above it required language level support.
+As I see it we souldn't allow direct dependencies on two different major versions of the same libraries,
+but different major verions can be selected during transitive dependency-resolution.
+
+For our language to support this we should make compiler to bind code to major version of dependency during compilation.
+Compiled artifacts should know wich major version of artifact it should bind to.
+Source code shouldn't contaign this knowledge, it should be sepcified in some module description used by
+compiler during build.
+
 ### Layout rule and curly braces ###
 
 I have no strong opinions about layout rule. But lately I've stated to think that it brings more
